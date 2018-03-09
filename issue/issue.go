@@ -56,6 +56,7 @@ func pay(w http.ResponseWriter, r *http.Request) {
 func main() {
 	session, _ := mgo.Dial("localhost:27017")
 	globalDB = session.DB("queue")
+	globalDB.C("bank").DropCollection()
 
 	user := currency{Account: account, Amount: 1000.00, Code: "USD"}
 	err := globalDB.C("bank").Insert(&user)

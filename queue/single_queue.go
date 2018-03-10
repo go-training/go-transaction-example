@@ -43,10 +43,13 @@ func pay(w http.ResponseWriter, r *http.Request) {
 
 	go func(wg *sync.WaitGroup) {
 		in <- account
-		select {
-		case result := <-out:
-			fmt.Printf("%+v\n", result)
-			wg.Done()
+		for {
+			select {
+			case result := <-out:
+				fmt.Printf("%+v\n", result)
+				wg.Done()
+				return
+			}
 		}
 	}(&wg)
 

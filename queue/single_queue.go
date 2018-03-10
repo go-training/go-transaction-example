@@ -62,13 +62,18 @@ func main() {
 	in = make(chan string)
 	out = make(chan Result)
 
-	session, _ := mgo.Dial("localhost:27017")
+	session, err := mgo.Dial("localhost:27017")
+
+	if err != nil {
+		panic("can't connect mongodb server")
+	}
+
 	globalDB = session.DB("logs")
 
 	globalDB.C("bank").DropCollection()
 
 	user := currency{Account: account, Amount: 1000.00, Code: "USD"}
-	err := globalDB.C("bank").Insert(&user)
+	err = globalDB.C("bank").Insert(&user)
 
 	if err != nil {
 		panic("insert error")

@@ -52,49 +52,55 @@ I have 100 users and there are 10( Q ) queues are listening are numbered from 0 
 
 ## Benchmark log
 
+Testing in [Digital Ocean](https://www.digitalocean.com/)
+
+* OS: Ubuntu 16.04.4 x64
+* Memory: 4 GB
+
 **500 requests per second**
 
 [safe.go](./safe/safe.go) using `sync.Mutex`
 
 ```
-$ echo "GET http://localhost:8000" | vegeta attack -rate=500 -duration=1s | tee results.bin | vegeta report
+$ echo "GET http://xxxx:8000" | vegeta attack -rate=500 -duration=1s | tee results.bin | vegeta report
 Requests      [total, rate]            500, 501.00
-Duration      [total, attack, wait]    28.972837965s, 997.999ms, 27.974838965s
-Latencies     [mean, 50, 95, 99, max]  14.254423593s, 14.374552947s, 26.767317492s, 27.757755763s, 27.974838965s
+Duration      [total, attack, wait]    26.55413484s, 997.998ms, 25.55613684s
+Latencies     [mean, 50, 95, 99, max]  12.72966531s, 12.672499818s, 24.193280734s, 25.313179771s, 25.558340237s
 Bytes In      [total, mean]            1000, 2.00
 Bytes Out     [total, mean]            0, 0.00
 Success       [ratio]                  100.00%
 Status Codes  [code:count]             200:500
 ```
 
-**1000 requests per second, run 10 seconds: total 10000 request**
+**1000 requests per second, run 60 seconds: total 60000 request**
 
 [single_queue.go](./queue/single_queue.go) using `goroutine` + `channel`
 
 ```
-$ echo "GET http://localhost:8000" | vegeta attack -rate=1000 -duration=10s | tee results.bin | vegeta report
-Requests      [total, rate]            10000, 1000.10
-Duration      [total, attack, wait]    11.671634607s, 9.998998s, 1.672636607s
-Latencies     [mean, 50, 95, 99, max]  769.856877ms, 591.605433ms, 1.609968811s, 1.653898066s, 1.676118025s
-Bytes In      [total, mean]            20000, 2.00
+$ echo "GET http://xxxx:8000" | vegeta attack -rate=1000 -duration=60s | tee results.bin | vegeta report
+Requests      [total, rate]            60000, 1000.02
+Duration      [total, attack, wait]    1m0.304137396s, 59.998999s, 305.138396ms
+Latencies     [mean, 50, 95, 99, max]  160.43181ms, 134.410249ms, 296.27135ms, 601.547655ms, 672.252801ms
+Bytes In      [total, mean]            120000, 2.00
 Bytes Out     [total, mean]            0, 0.00
 Success       [ratio]                  100.00%
-Status Codes  [code:count]             200:10000
+Status Codes  [code:count]             200:60000
+Error Set:
 ```
 
-**1000 requests per second, run 10 seconds: total 10000 request**
+**1000 requests per second, run 60 seconds: total 60000 request**
 
 [multiple_queue.go](./multiple_queue/multiple_queue.go) using `goroutine` + `channel`
 
 ```
-$ echo "GET http://localhost:8000" | vegeta attack -rate=1000 -duration=10s | tee results.bin | vegeta report
-Requests      [total, rate]            10000, 1000.10
-Duration      [total, attack, wait]    10.02490889s, 9.998999s, 25.90989ms
-Latencies     [mean, 50, 95, 99, max]  95.235263ms, 34.493445ms, 367.340027ms, 522.060345ms, 676.246746ms
-Bytes In      [total, mean]            20000, 2.00
+$ echo "GET http://xxxx:8000" | vegeta attack -rate=1000 -duration=60s | tee results.bin | vegeta report
+Requests      [total, rate]            60000, 1000.02
+Duration      [total, attack, wait]    1m0.195742549s, 59.998999s, 196.743549ms
+Latencies     [mean, 50, 95, 99, max]  132.990084ms, 131.41928ms, 151.442286ms, 204.313958ms, 476.134408ms
+Bytes In      [total, mean]            120000, 2.00
 Bytes Out     [total, mean]            0, 0.00
 Success       [ratio]                  100.00%
-Status Codes  [code:count]             200:10000
+Status Codes  [code:count]             200:60000
 Error Set:
 ```
 
@@ -102,6 +108,6 @@ Conclustion:
 
 |                | max Latencies | mean Latencies |
 |----------------|---------------|----------------|
-| sync lock      | 27.974838965s | 14.254423593s  |
-| single queue   | 1.676118025s  | 769.856877ms   |
-| multiple queue | 676.246746ms  | 95.235263ms    |
+| sync lock      | 25.558340237s | 12.72966531s   |
+| single queue   | 672.252801ms  | 160.43181ms    |
+| multiple queue | 476.134408ms  | 132.990084ms   |

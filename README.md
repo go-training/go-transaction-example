@@ -43,7 +43,7 @@ First solution is using `sync.Mutex` to Lock other thread access this section of
 
 Each payment is processed one by one.Take a look at [single_queue.go](./queue/single_queue.go). I have implemented 2 channels. The first one is input channel (user acccount) and other one is output channel (Get user amount).
 
-### Multiple queues [multiple_queue.go](./multiple/multiple_queue.go)
+### Multiple queues [multiple_queue.go](./multiple_queue/multiple_queue.go)
 
 I have 100 users and there are 10( Q ) queues are listening are numbered from 0 -> 9 ( 10 -1 ). If user X ( 0-> 99 ) I calculate what queue it should be used. My rule is simple by get modulo of X by Q.
 

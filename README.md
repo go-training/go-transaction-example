@@ -101,7 +101,7 @@ Error Set:
 [single_queue.go](./queue/single_queue.go) using `goroutine` + `channel`
 
 ```
-$ echo "GET http://xxxx:8000" | vegeta attack -rate=1000 -duration=60s | tee results.bin | vegeta report
+$ echo "GET http://localhost:8000" | vegeta attack -rate=1000 -duration=60s | tee results.bin | vegeta report
 Requests      [total, rate]            60000, 1000.02
 Duration      [total, attack, wait]    1m0.304137396s, 59.998999s, 305.138396ms
 Latencies     [mean, 50, 95, 99, max]  160.43181ms, 134.410249ms, 296.27135ms, 601.547655ms, 672.252801ms

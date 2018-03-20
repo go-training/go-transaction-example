@@ -70,14 +70,15 @@ Testing in [Digital Ocean](https://www.digitalocean.com/)
 [safe.go](./safe/safe.go) using `sync.Mutex`
 
 ```
-$ echo "GET http://xxxx:8000" | vegeta attack -rate=500 -duration=1s | tee results.bin | vegeta report
+$ echo "GET http://localhost:8000" | vegeta attack -rate=500 -duration=1s | tee results.bin | vegeta report
 Requests      [total, rate]            500, 501.00
-Duration      [total, attack, wait]    26.55413484s, 997.998ms, 25.55613684s
-Latencies     [mean, 50, 95, 99, max]  12.72966531s, 12.672499818s, 24.193280734s, 25.313179771s, 25.558340237s
+Duration      [total, attack, wait]    27.248468672s, 997.999728ms, 26.250468944s
+Latencies     [mean, 50, 95, 99, max]  13.171447347s, 13.256585994s, 25.01617146s, 26.093162165s, 26.250468944s
 Bytes In      [total, mean]            1000, 2.00
 Bytes Out     [total, mean]            0, 0.00
 Success       [ratio]                  100.00%
 Status Codes  [code:count]             200:500
+Error Set:
 ```
 
 **500 requests per second**
@@ -85,10 +86,10 @@ Status Codes  [code:count]             200:500
 [optimistic.go](./optimistic/optimistic.go) using [Optimistic concurrency control](http://en.wikipedia.org/wiki/Optimistic_concurrency_control)
 
 ```
-$ echo "GET http://localhost:8000" | vegeta attack -rate=500 -connections=1 -duration=1s | tee results.bin | vegeta report
+$ echo "GET http://localhost:8000" | vegeta attack -rate=500 -duration=1s | tee results.bin | vegeta report
 Requests      [total, rate]            500, 501.00
-Duration      [total, attack, wait]    18.539144778s, 997.999ms, 17.541145778s
-Latencies     [mean, 50, 95, 99, max]  10.997901288s, 12.511709164s, 17.129697249s, 17.62389672s, 18.280330431s
+Duration      [total, attack, wait]    5.285286131s, 997.999795ms, 4.287286336s
+Latencies     [mean, 50, 95, 99, max]  1.903748023s, 1.983848904s, 4.049558826s, 4.516593338s, 5.016707396s
 Bytes In      [total, mean]            1000, 2.00
 Bytes Out     [total, mean]            0, 0.00
 Success       [ratio]                  100.00%
@@ -96,35 +97,51 @@ Status Codes  [code:count]             200:500
 Error Set:
 ```
 
-**1000 requests per second, run 60 seconds: total 60000 request**
+**500 requests per second, run 60 seconds: total 30000 request**
 
 [single_queue.go](./queue/single_queue.go) using `goroutine` + `channel`
 
 ```
-$ echo "GET http://localhost:8000" | vegeta attack -rate=1000 -duration=60s | tee results.bin | vegeta report
-Requests      [total, rate]            60000, 1000.02
-Duration      [total, attack, wait]    1m0.304137396s, 59.998999s, 305.138396ms
-Latencies     [mean, 50, 95, 99, max]  160.43181ms, 134.410249ms, 296.27135ms, 601.547655ms, 672.252801ms
-Bytes In      [total, mean]            120000, 2.00
+$ echo "GET http://localhost:8000" | vegeta attack -rate=500 -duration=60s | tee results.bin | vegeta report
+Requests      [total, rate]            30000, 500.02
+Duration      [total, attack, wait]    59.999000882s, 59.997999731s, 1.001151ms
+Latencies     [mean, 50, 95, 99, max]  763.662µs, 678.816µs, 862.271µs, 1.570812ms, 66.078117ms
+Bytes In      [total, mean]            60000, 2.00
 Bytes Out     [total, mean]            0, 0.00
 Success       [ratio]                  100.00%
-Status Codes  [code:count]             200:60000
+Status Codes  [code:count]             200:30000
 Error Set:
 ```
 
-**1000 requests per second, run 60 seconds: total 60000 request**
+**500 requests per second, run 60 seconds: total 30000 request**
 
 [multiple_queue.go](./multiple_queue/multiple_queue.go) using `goroutine` + `channel`
 
 ```
-$ echo "GET http://xxxx:8000" | vegeta attack -rate=1000 -duration=60s | tee results.bin | vegeta report
-Requests      [total, rate]            60000, 1000.02
-Duration      [total, attack, wait]    1m0.195742549s, 59.998999s, 196.743549ms
-Latencies     [mean, 50, 95, 99, max]  132.990084ms, 131.41928ms, 151.442286ms, 204.313958ms, 476.134408ms
-Bytes In      [total, mean]            120000, 2.00
+$ echo "GET http://localhost:8000" | vegeta attack -rate=500 -duration=60s | tee results.bin | vegeta report
+Requests      [total, rate]            30000, 500.02
+Duration      [total, attack, wait]    59.9988601s, 59.997999803s, 860.297µs
+Latencies     [mean, 50, 95, 99, max]  789.131µs, 723.723µs, 950.715µs, 1.516693ms, 49.270982ms
+Bytes In      [total, mean]            60000, 2.00
 Bytes Out     [total, mean]            0, 0.00
 Success       [ratio]                  100.00%
-Status Codes  [code:count]             200:60000
+Status Codes  [code:count]             200:30000
+Error Set:
+```
+
+**500 requests per second, run 60 seconds: total 30000 request**
+
+[optimistic_queue.go](./optimistic_queue/single_queue.go) using `goroutine` + `channel` + `Optimistic concurrency control`。Run two application in PORT `8081` and `8082`
+
+```
+$ echo "GET http://localhost:8081" | vegeta attack -rate=500 -duration=60s | tee results.bin | vegeta report
+Requests      [total, rate]            30000, 500.02
+Duration      [total, attack, wait]    59.999107154s, 59.997999809s, 1.107345ms
+Latencies     [mean, 50, 95, 99, max]  1.297197ms, 826.466µs, 1.568221ms, 3.047957ms, 139.045488ms
+Bytes In      [total, mean]            60000, 2.00
+Bytes Out     [total, mean]            0, 0.00
+Success       [ratio]                  100.00%
+Status Codes  [code:count]             200:30000
 Error Set:
 ```
 

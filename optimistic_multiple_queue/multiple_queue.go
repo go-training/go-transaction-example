@@ -6,6 +6,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"os"
 	"strconv"
 	"sync"
 	"time"
@@ -62,6 +63,10 @@ func pay(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8000"
+	}
 	in = make([]chan string, maxThread)
 	out = make([]chan Result, maxThread)
 
@@ -122,7 +127,7 @@ func main() {
 		}(&in[i], i)
 	}
 
-	log.Println("Listen server on 8000 port")
+	log.Println("Listen server on " + port + " port")
 	http.HandleFunc("/", pay)
-	http.ListenAndServe(":8000", nil)
+	http.ListenAndServe(":"+port, nil)
 }

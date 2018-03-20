@@ -145,6 +145,22 @@ Status Codes  [code:count]             200:30000
 Error Set:
 ```
 
+**500 requests per second, run 60 seconds: total 30000 request**
+
+[optimistic_multiple_queue.go](./optimistic_multiple_queue/multiple_queue.go) using `goroutine` + `channel` + `Optimistic concurrency control`。Run two application in PORT `8081` and `8082`
+
+```
+$ echo "GET http://localhost:8081" | vegeta attack -rate=500 -duration=60s | tee results.bin | vegeta report
+Requests      [total, rate]            30000, 500.02
+Duration      [total, attack, wait]    59.99868945s, 59.997999842s, 689.608µs
+Latencies     [mean, 50, 95, 99, max]  924.951µs, 821.617µs, 1.2388ms, 1.978441ms, 51.268963ms
+Bytes In      [total, mean]            60000, 2.00
+Bytes Out     [total, mean]            0, 0.00
+Success       [ratio]                  100.00%
+Status Codes  [code:count]             200:30000
+Error Set:
+```
+
 Conclustion:
 
 |                | max Latencies | mean Latencies |

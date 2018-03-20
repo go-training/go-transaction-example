@@ -163,9 +163,11 @@ Error Set:
 
 Conclustion:
 
-|                | max Latencies | mean Latencies |
-|----------------|---------------|----------------|
-| sync lock      | 25.558340237s | 12.72966531s   |
-| optimistic lock| 18.539144778s | 10.997901288s  |
-| single queue   | 672.252801ms  | 160.43181ms    |
-| multiple queue | 476.134408ms  | 132.990084ms   |
+|                           | max Latencies | mean Latencies |
+|---------------------------|---------------|----------------|
+| sync lock                 | 26.250468944s | 13.171447347s   |
+| optimistic lock           | 5.016707396s  | 1.903748023s  |
+| single queue              | 66.078117ms   | 763.662µs    |
+| multiple queue            | 49.270982ms   | 789.131µs   |
+| optimistic single queue   | 139.045488ms  | 1.297197ms   |
+| optimistic multiple queue | 51.268963ms   | 924.951µs   |

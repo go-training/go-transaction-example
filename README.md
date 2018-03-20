@@ -171,3 +171,6 @@ Conclustion:
 | multiple queue            | 49.270982ms   | 789.131µs      | 100          |
 | optimistic single queue   | 139.045488ms  | 1.297197ms     | 1            |
 | optimistic multiple queue | 51.268963ms   | 924.951µs      | 100          |
+
+
+ref: [PostgreSQL anti-patterns: read-modify-write cycles](https://blog.2ndquadrant.com/postgresql-anti-patterns-read-modify-write-cycles/)

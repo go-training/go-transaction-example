@@ -121,7 +121,7 @@ func main() {
 
 	}(&in)
 
-	log.Println("Listen server on 8000 port")
+	log.Println("Listen server on " + port + " port")
 	http.HandleFunc("/", pay)
 	http.ListenAndServe(":"+port, nil)
 }

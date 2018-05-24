@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io"
 	"log"
 	"math/rand"
@@ -16,15 +15,14 @@ import (
 )
 
 var globalDB *mgo.Database
-var in []chan string
-var out []chan Result
+var in []chan Data
 var maxUser = 100
 var maxThread = 10
 
-// Result output
-type Result struct {
+// Data struct
+type Data struct {
 	Account string
-	Result  float64
+	Result  *chan float64
 }
 
 type currency struct {
@@ -49,10 +47,14 @@ func pay(w http.ResponseWriter, r *http.Request) {
 		number := Random(1, maxUser)
 		channelNumber := number % maxThread
 		account := "user" + strconv.Itoa(number)
-		in[channelNumber] <- account
+		result := make(chan float64)
+		in[channelNumber] <- Data{
+			Account: account,
+			Result:  &result,
+		}
 		select {
-		case result := <-out[channelNumber]:
-			fmt.Printf("%+v\n", result)
+		case result := <-result:
+			log.Printf("account: %v, result: %+v\n", account, result)
 			wg.Done()
 		}
 	}(&wg)
@@ -67,8 +69,7 @@ func main() {
 	if port == "" {
 		port = "8000"
 	}
-	in = make([]chan string, maxThread)
-	out = make([]chan Result, maxThread)
+	in = make([]chan Data, maxThread)
 
 	session, _ := mgo.Dial("localhost:27017")
 	globalDB = session.DB("logs")
@@ -76,8 +77,7 @@ func main() {
 	globalDB.C("bank").DropCollection()
 
 	for i := range in {
-		in[i] = make(chan string)
-		out[i] = make(chan Result)
+		in[i] = make(chan Data)
 	}
 
 	// create 100 user
@@ -90,14 +90,14 @@ func main() {
 	}
 
 	for i := range in {
-		go func(in *chan string, i int) {
+		go func(in *chan Data, i int) {
 			for {
 				select {
-				case account := <-*in:
+				case data := <-*in:
 				LOOP:
 					entry := currency{}
 					// step 1: get current amount
-					err := globalDB.C("bank").Find(bson.M{"account": account}).One(&entry)
+					err := globalDB.C("bank").Find(bson.M{"account": data.Account}).One(&entry)
 
 					if err != nil {
 						panic(err)
@@ -114,13 +114,11 @@ func main() {
 					}})
 
 					if err != nil {
+						log.Println("got errors: ", err)
 						goto LOOP
 					}
 
-					out[i] <- Result{
-						Account: account,
-						Result:  entry.Amount,
-					}
+					*data.Result <- entry.Amount
 				}
 			}
 

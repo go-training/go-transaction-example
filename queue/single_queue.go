@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"io"
 	"log"
 	"math/rand"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 
@@ -15,13 +15,12 @@ import (
 
 var globalDB *mgo.Database
 var account = "appleboy"
-var in chan string
-var out chan Result
+var in chan Data
 
-// Result output
-type Result struct {
+// Data struct
+type Data struct {
 	Account string
-	Result  float64
+	Result  *chan float64
 }
 
 type currency struct {
@@ -42,13 +41,16 @@ func pay(w http.ResponseWriter, r *http.Request) {
 	wg.Add(1)
 
 	go func(wg *sync.WaitGroup) {
-		in <- account
+		result := make(chan float64)
+		in <- Data{
+			Account: account,
+			Result:  &result,
+		}
 		for {
 			select {
-			case result := <-out:
-				fmt.Printf("%+v\n", result)
+			case result := <-result:
+				log.Printf("account: %v, result: %+v\n", account, result)
 				wg.Done()
-				return
 			}
 		}
 	}(&wg)
@@ -59,8 +61,11 @@ func pay(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	in = make(chan string)
-	out = make(chan Result)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8000"
+	}
+	in = make(chan Data)
 
 	session, err := mgo.Dial("localhost:27017")
 
@@ -79,13 +84,13 @@ func main() {
 		panic("insert error")
 	}
 
-	go func(in *chan string) {
+	go func(in *chan Data) {
 		for {
 			select {
-			case account := <-*in:
+			case data := <-*in:
 				entry := currency{}
 				// step 1: get current amount
-				err := globalDB.C("bank").Find(bson.M{"account": account}).One(&entry)
+				err := globalDB.C("bank").Find(bson.M{"account": data.Account}).One(&entry)
 
 				if err != nil {
 					panic(err)
@@ -99,16 +104,13 @@ func main() {
 					panic("update error")
 				}
 
-				out <- Result{
-					Account: account,
-					Result:  entry.Amount,
-				}
+				*data.Result <- entry.Amount
 			}
 		}
 
 	}(&in)
 
-	log.Println("Listen server on 8000 port")
+	log.Println("Listen server on " + port + " port")
 	http.HandleFunc("/", pay)
-	http.ListenAndServe(":8000", nil)
+	http.ListenAndServe(":"+port, nil)
 }

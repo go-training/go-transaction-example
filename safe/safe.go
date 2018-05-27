@@ -6,6 +6,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 
@@ -59,6 +60,10 @@ func pay(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8000"
+	}
 	session, _ := mgo.Dial("localhost:27017")
 	globalDB = session.DB("logs")
 
@@ -71,7 +76,9 @@ func main() {
 		panic("insert error")
 	}
 
-	log.Println("Listen server on 8000 port")
+	log.Println("Listen server on " + port + " port")
 	http.HandleFunc("/", pay)
-	http.ListenAndServe(":8000", nil)
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal(err)
+	}
 }

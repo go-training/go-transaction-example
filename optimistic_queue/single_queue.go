@@ -3,11 +3,9 @@ package main
 import (
 	"io"
 	"log"
-	"math/rand"
 	"net/http"
 	"os"
 	"sync"
-	"time"
 
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
@@ -29,12 +27,6 @@ type currency struct {
 	Account string        `bson:"account"`
 	Code    string        `bson:"code"`
 	Version int           `bson:"version"`
-}
-
-// Random get random value
-func Random(min, max int) int {
-	rand.Seed(time.Now().UTC().UnixNano())
-	return rand.Intn(max-min+1) + min
 }
 
 func pay(w http.ResponseWriter, r *http.Request) {
@@ -120,5 +112,7 @@ func main() {
 
 	log.Println("Listen server on " + port + " port")
 	http.HandleFunc("/", pay)
-	http.ListenAndServe(":"+port, nil)
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal(err)
+	}
 }

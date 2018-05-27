@@ -80,5 +80,7 @@ func main() {
 
 	log.Println("Listen server on " + port + " port")
 	http.HandleFunc("/", pay)
-	http.ListenAndServe(":"+port, nil)
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal(err)
+	}
 }
